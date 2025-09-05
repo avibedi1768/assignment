@@ -1,0 +1,61 @@
+select * from categories;
+select * from products;
+select * from suppliers;
+
+-- 1 
+delimiter $$
+create function total_stock_available (s_id varchar(60))
+returns int
+deterministic
+begin
+return (select sum(stock_quantity) 
+from products 
+where supplier_id = s_id);
+end $$
+delimiter ;
+
+select total_stock_available(2) as stocks;
+
+-- 2 
+delimiter $$
+create function getName()
+returns varchar(60)
+deterministic
+begin
+return(
+select product_name 
+from products
+where supplier_id = (
+	select supplier_id from suppliers where contact_email = 'sales@globalgoods.com'
+) and category_id = '1');
+end $$
+delimiter ;
+
+select getName() as name;
+
+
+select * from products;
+
+-- 3
+delimiter $$
+create procedure getProds ()
+begin
+select product_name 
+from products;
+end $$
+delimiter ;
+
+call getProds();
+
+-- 4 
+delimiter $$
+create procedure getStocks (in c_id int, out stocks int)
+begin
+select sum(stock_quantity) into stocks
+from products
+where category_id = c_id;
+end $$
+delimiter ;
+
+call getStocks(3, @stocks);
+select @stocks as stocks;
